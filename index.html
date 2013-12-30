@@ -1,0 +1,140 @@
+<!doctype html>
+<head>
+  <meta charset="utf-8">
+
+  <title>barley-brick</title>
+
+  <style>
+    #viewport {
+      overflow: hidden;
+      margin: 0 auto;
+      background: #444;
+      position: relative;
+    }
+    .cell {
+      position: absolute;
+      color: #fff;
+      text-align: center;
+      background: #000;
+      overflow: hidden;
+    }
+
+    .img {
+      position:absolute;
+    }
+
+    .cell>.img {
+      opacity: 0.7
+    }
+  </style>
+
+  <script src="http://code.jquery.com/jquery-1.10.2.min.js"></script>
+  <script>
+    $(function() {
+      var UP = 38;
+      var DOWN = 40;
+      var LEFT = 37;
+      var RIGHT = 39;
+      var SIZE = 650;
+      var CELL_COUNT = 4;
+      var CELL_SIZE = Math.round(SIZE / CELL_COUNT);
+      var NUMBERS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
+
+      var class_name = function(x, y) { return 'cell_' + x + "_" + y; }
+      var top_c = function(y) { return ((y - 1) * CELL_SIZE); }
+      var left_c = function(x) { return ((x - 1) * CELL_SIZE); }
+
+      var hDIV = function(content) { return $("<div>" + content + "</div>") }
+      var hIMG = function(number) {
+        var y = Math.round(number / 4);
+        if (y == 0) { y = 1 }
+        var x = number - (y - 1) * 4;
+        return $('#viewport>.img').clone().css({
+          top: - top_c(y),
+          left: - left_c(x),
+        })
+      }
+
+      var hCELL = function(x, y, number) {
+        return hDIV(number).addClass('cell').addClass(class_name(x, y))
+        .css({
+          top: top_c(y),
+          left: left_c(x),
+          width: CELL_SIZE,
+          height: CELL_SIZE,
+          'font-size': Math.round(CELL_SIZE / 1.3),
+        }).append(hIMG(number));
+      }
+
+      var jVP = $('#viewport')
+      var jIM = $('#img')
+
+      jVP.width(SIZE);
+      jVP.height(SIZE);
+
+      if (jIM.width > jIM.height) { jIM.width(SIZE); } else { jIM.height(SIZE); }
+
+      for (var x = 1; x <= CELL_COUNT; x++) {
+        for (var y = 1; y <= CELL_COUNT; y++) {
+          var i = Math.floor(Math.random() * NUMBERS.length);
+          n = NUMBERS.splice(i, 1);
+          if (n.length > 0) {
+            jVP.append(hCELL(x, y, n));
+          }
+        }
+      }
+
+      var cursor_x = 4;
+      var cursor_y = 4;
+
+      $(document).keydown(function(e){
+        var new_name = class_name(cursor_x, cursor_y);
+
+        switch (e.keyCode) {
+          case DOWN:
+            if (cursor_y > 1) {
+              cursor_y--;
+              var name = class_name(cursor_x, cursor_y);
+              $("." + name).removeClass(name).addClass(new_name).css({
+                top: top_c(cursor_y + 1)
+              });
+            }
+          break;
+          case UP:
+            if (cursor_y < 4) {
+              cursor_y++;
+              var name = class_name(cursor_x, cursor_y);
+              $("." + name).removeClass(name).addClass(new_name).css({
+                top: top_c(cursor_y - 1)
+              });
+            }
+          break;
+          case RIGHT:
+            if (cursor_x > 1) {
+              cursor_x--
+              var name = class_name(cursor_x, cursor_y);
+              $("." + name).removeClass(name).addClass(new_name).css({
+                left: left_c(cursor_x + 1)
+              });
+            }
+          break;
+          case LEFT:
+            if (cursor_x < 4) {
+              cursor_x++
+              var name = class_name(cursor_x, cursor_y);
+              $("." + name).removeClass(name).addClass(new_name).css({
+                left: left_c(cursor_x - 1)
+              });
+            }
+          break;
+          event.preventDefault();
+        }
+      });
+    })
+  </script>
+</head>
+<body>
+  <div id="viewport" >
+    <img class="img" src="1.jpg">
+  </div>
+</body>
