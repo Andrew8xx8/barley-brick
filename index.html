@@ -37,18 +37,21 @@
       var RIGHT = 39;
       var SIZE = 650;
       var CELL_COUNT = 4;
+      var FILLED_CELLS_COUNT = (CELL_COUNT * CELL_COUNT) - 1;
       var CELL_SIZE = Math.round(SIZE / CELL_COUNT);
       var NUMBERS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
+      var SHUFFLE_ITERATIONS = 500;
 
       var class_name = function(x, y) { return 'cell_' + x + "_" + y; }
       var top_c = function(y) { return ((y - 1) * CELL_SIZE); }
       var left_c = function(x) { return ((x - 1) * CELL_SIZE); }
+      var get_x = function(number) { return (number % CELL_COUNT) + 1 }
+      var get_y = function(number) { return Math.floor(number / CELL_COUNT) + 1 }
 
       var hDIV = function(content) { return $("<div>" + content + "</div>") }
       var hIMG = function(number) {
-        var y = Math.round(number / 4);
-        if (y == 0) { y = 1 }
-        var x = number - (y - 1) * 4;
+        var x = get_x(number - 1);
+        var y = get_y(number - 1);
         return $('#viewport>.img').clone().css({
           top: - top_c(y),
           left: - left_c(x),
@@ -74,23 +77,19 @@
 
       if (jIM.width > jIM.height) { jIM.width(SIZE); } else { jIM.height(SIZE); }
 
-      for (var x = 1; x <= CELL_COUNT; x++) {
-        for (var y = 1; y <= CELL_COUNT; y++) {
-          var i = Math.floor(Math.random() * NUMBERS.length);
-          n = NUMBERS.splice(i, 1);
-          if (n.length > 0) {
-            jVP.append(hCELL(x, y, n));
-          }
-        }
+      for (var i = 0; i < FILLED_CELLS_COUNT; i++) {
+        var x = get_x(i),
+            y = get_y(i),
+            number = i + 1;
+        jVP.append(hCELL(x, y, number));
       }
 
-      var cursor_x = 4;
-      var cursor_y = 4;
+      var cursor_x = CELL_COUNT;
+      var cursor_y = CELL_COUNT;
 
-      $(document).keydown(function(e){
+      function move_tile(move_direction) {
         var new_name = class_name(cursor_x, cursor_y);
-
-        switch (e.keyCode) {
+        switch (move_direction) {
           case DOWN:
             if (cursor_y > 1) {
               cursor_y--;
@@ -127,8 +126,23 @@
               });
             }
           break;
-          event.preventDefault();
         }
+      }
+      
+      for (var i = 0; i < SHUFFLE_ITERATIONS; i++) {
+          var random_direction = LEFT + Math.floor(Math.random() * 4)
+          move_tile(random_direction);
+      }
+      while (cursor_x < CELL_COUNT) {
+        move_tile(LEFT);
+      }
+      while (cursor_y < CELL_COUNT) {
+        move_tile(UP);
+      }
+
+      $(document).keydown(function(e){
+          move_tile(e.keyCode);
+          event.preventDefault();
       });
     })
   </script>
